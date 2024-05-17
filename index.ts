@@ -7,7 +7,9 @@
 
 
 // Se construye el server
-   const server = new Server();
+//   const server = new Server();
+const server = Server.instancia;
+
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
