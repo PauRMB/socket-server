@@ -1,46 +1,68 @@
 
 
         import express from 'express';
-import { SERVER_PORT } from '../global/environment';
        import socketIO from 'socket.io';
            import http from 'http';
+   import * as socketM from '../sockets/socket'
+
+import { SERVER_PORT } from '../global/environment';
 
 
 export default class Server
   {
-  // Propiedad Estatica
+  // Propiedades - Atributos
+
+  // Propiedad Estatica 
      private static _instancia: Server;
 
-  // Propiedades - Atributos
+  // Esta Propiedad es el SERVIDOR que vamos a levantar del server de express
      public app: express.Application ;
      public port: number;
+
+  /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+   *       Esta PROPIEDAD va tener la configuración de la conexion de los SOCKETS      *
+   *      Y va ser la encargada de emitir eventos y escuchar los cambios, es decir,    *
+   *  Es el encargado de los eventos tanto de emision como de recepcion de los sockets *
+   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
      public io: socketIO.Server;
 
-  // este es el servidor que vamos a levantar en vez de el server de express
+
+  // Esta Propiedad es el SERVIDOR que vamos a levantar en vez del server de express
      private httpServer: http.Server;  
 
 
   // Definicion del constructor
      private constructor() 
        {
-      // Aqui se inicializa la propiedad app
+      // Aqui se inicializa la propiedad app ->
+      // Nota: 
+      // Socket y express no Trabajan juntos directamente
+      // por eso se usa un intermediario que es protocolo http
          this.app = express();
 
       // Aqui se inicializa la propiedad port
          this.port = SERVER_PORT;
 
-      // Se inicializa el servidor http y se la manda como parametro 
+      // Se inicializa el SERVIDOR http y se la manda como parametro 
       // la configuración que tiene la app de express
          this.httpServer = new http.Server( this.app );
 
       // Aqui se configura la propiedad -- io -- es decir el socket
-      //   this.io = socketIO( this.httpServer ); sale un error
-         this.io = new socketIO.Server( this.httpServer );
-      //   this.io = new socketIO.Server( this.httpServer, { cors: { origin: true, credentials: true } } );
+      // this.io = new socketIO.Server( this.httpServer );
+      // Tambien se puede resolver de esta otra forma
+      // this.io = new socketIO.Server( this.httpServer, { cors: { origin: true, credentials: true } } );
+
+      
+      // Para darle permiso al servidor que entra por el puerto 4200
+         this.io = new socketIO.Server( this.httpServer, { 
+                                                           cors: { 
+                                                                     origin: "http://localhost:4200", 
+                                                                    methods: ["GET", "POST"]
+                                                                 }
+                                                         } );
 
       // Se llama el metodo para el monitoreo de sockets
          this.escucharSockets();
-
        }
 
 
@@ -63,12 +85,19 @@ export default class Server
         this.io.on( 'connection', cliente => 
                       {
                         console.log( 'Cliente 01 Conectado' );
+
+                        // Desconectar
+                        socketM.desconectar
                       }
                   );
       }
 
 
-  // Este metodo start inicializa el servidor
+
+  /* * * * * * * * * * * * * * * * * * * * * * * * * *
+   *     Este Metodo start inicializa el servidor    *
+   *               htttp   o   el express            *
+   * * * * * * * * * * * * * * * * * * * * * * * * * */
      start = ( callback: (() => void) ) => 
                {
                 // En vez de inicializar el servidor de express
@@ -77,5 +106,4 @@ export default class Server
                 // Se inicializa el servidor http
                    this.httpServer.listen( this.port, callback );
                };
-   
   }

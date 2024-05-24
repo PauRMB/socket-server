@@ -6,10 +6,8 @@
          import cors from 'cors';
 
 
-// Se construye el server
-//   const server = new Server();
-const server = Server.instancia;
-
+// Se construye la instancia de la clase Server
+   const server = Server.instancia;
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
