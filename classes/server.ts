@@ -84,10 +84,13 @@ export default class Server
 
         this.io.on( 'connection', cliente => 
                       {
-                        console.log( 'Cliente 01 Conectado' );
+                        console.log( 'Cliente Conectado - EscucharS - 01-server-ex ' );
 
-                        // Desconectar
-                        socketM.desconectar
+                     // Mensajes
+                        socketM.mensaje( cliente, this.io );
+
+                     // Desconectar
+                        socketM.desconectar( cliente );
                       }
                   );
       }
